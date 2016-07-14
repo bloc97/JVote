@@ -5,6 +5,7 @@
  */
 package simple.weighted.voting.system;
 
+import java.util.Random;
 import java.util.Scanner;
 
 /**
@@ -18,17 +19,20 @@ public class Main {
     static float percentage = 0;
     static float choicefloat;
     static float total;
+    static int chosenmap;
+    static boolean isDebug = true;
+    static boolean isAdvDebug = false;
     
     
-    public static void getVotes(){
+    public static float[] getVotes(){
         Scanner input = new Scanner(System.in);
 
-        System.out.print("Enter the number of choices: ");CHOICES=input.nextInt();
+        System.out.print("Enter the number of choices: ");Main.CHOICES=input.nextInt();
         
         
-        choiceList = new float[CHOICES];
-        for (int i=0;i<CHOICES;i++){
-            if (i<CHOICES-1 && Main.percentage<100F){
+        choiceList = new float[Main.CHOICES];
+        for (int i=0;i<Main.CHOICES;i++){
+            if (i<Main.CHOICES-1 && Main.percentage<100F){
                 System.out.print("Enter vote percent for map "+(i+1)+": ");choicefloat=input.nextFloat();
                 if (choicefloat<=100-Main.percentage){
                     choiceList[i]=choicefloat;
@@ -40,7 +44,7 @@ public class Main {
                     Main.percentage=100F;
                 }
             }
-            else if (i==CHOICES-1){
+            else if (i==Main.CHOICES-1){
                 choiceList[i]=100-Main.percentage;
                 Main.percentage=100F;
             }
@@ -48,18 +52,49 @@ public class Main {
                 choiceList[i]=0;
             }
         }
-        
+        return choiceList;
     }
     
-    public static void printVotes(){
-        for (int i=0;i<CHOICES;i++){
-            System.out.println(choiceList[i]+"%");
+    public static float randomGen(){
+        Random random = new Random();
+        Float value = random.nextFloat()*100;
+        return value;
+    }
+    
+    public static void getHighTableValue(float[] table){
+        for (int i=1;i<table.length;i++){
+            table[i]=table[i]+table[i-1];
+        }
+    }
+    
+    public static int getMap(float[] table, float value){
+        for (int i=0;i<table.length;i++){
+            if (value>table[i]){
+                chosenmap=i+1;
+            }
+        }
+        return chosenmap;
+    }
+    
+    public static void printVotes(float[] table){
+        for (int i=0;i<table.length;i++){
+            System.out.println("Vote "+(i+1)+": "+choiceList[i]+"%");
             total = total+choiceList[i];
             
         }
         
         System.out.println("Total: "+total+"%");
     }
+    
+    public static void printHigh(float[] table){
+        for (int i=0;i<table.length;i++){
+            System.out.println("Vote "+(i+1)+": "+choiceList[i]+"%");
+            total = total+choiceList[i];
+            
+        }
+    }
+    
+    
 
     /**
      * @param args the command line arguments
@@ -67,9 +102,34 @@ public class Main {
     public static void main(String[] args) {
         // TODO code application logic here
         
-        getVotes();
+        choiceList=getVotes();
+        if (Main.isDebug){printVotes(choiceList);}
         
-        printVotes();
+        getHighTableValue(choiceList);
+        if (Main.isDebug){printHigh(choiceList);}
+        
+        Scanner input = new Scanner(System.in);
+        
+        if (Main.isDebug){
+            
+            System.out.print("Enter the number of rounds: ");int rounds=input.nextInt();
+            for (int i=0;i<rounds;i++){
+                chosenmap=0;
+                float random=randomGen();
+                if (Main.isAdvDebug){System.out.println(random+"%");}
+                chosenmap=getMap(choiceList, random);
+                System.out.println("The Chosen Map is: "+(chosenmap+1));
+            }
+            
+            
+        }
+        else{
+            
+            float random=randomGen();
+            chosenmap=getMap(choiceList, random);
+            System.out.println("The Chosen Map is: "+(chosenmap+1));
+        }
+        
         
     }
     
